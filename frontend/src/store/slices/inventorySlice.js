@@ -28,6 +28,21 @@ export const getInventory = createAsyncThunk(
   }
 );
 
+export const adjustInventory = createAsyncThunk(
+  'inventory/adjust',
+  async (adjustmentData, thunkAPI) => {
+    try {
+      return await inventoryService.adjustInventory(adjustmentData);
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const inventorySlice = createSlice({
   name: 'inventory',
   initialState,
@@ -50,6 +65,17 @@ const inventorySlice = createSlice({
       .addCase(getInventory.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(adjustInventory.fulfilled, (state, action) => {
+        const index = state.inventory.findIndex(
+          (inv) => inv.product_id === action.payload.data.product_id && inv.location_id === action.payload.data.location_id
+        );
+        if (index !== -1) {
+          state.inventory[index] = action.payload.data;
+        } else {
+          // It's a new inventory record for that location/product combo, push it
+          state.inventory.unshift(action.payload.data);
+        }
       });
   },
 });

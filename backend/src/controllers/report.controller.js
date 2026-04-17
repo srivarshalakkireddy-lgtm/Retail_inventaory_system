@@ -18,7 +18,6 @@ const getDashboardStats = async (req, res, next) => {
     const revenueResult = await SalesOrder.sum('total_amount');
     const totalRevenue = revenueResult || 0;
 
-    // Get low stock items
     const lowStockItems = await Inventory.count({
       include: [
         {
@@ -29,11 +28,21 @@ const getDashboardStats = async (req, res, next) => {
       ],
     });
 
+    // Get order status counts
+    const orderStatusCounts = await SalesOrder.findAll({
+      attributes: ['status', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      group: ['status']
+    });
+
     const stats = {
       totalProducts,
       totalOrders,
       totalRevenue: parseFloat(totalRevenue).toFixed(2),
       lowStockItems,
+      orderStatusCounts: orderStatusCounts.map(s => ({
+        status: s.status,
+        count: parseInt(s.dataValues.count, 10)
+      })),
     };
 
     successResponse(res, stats, 'Dashboard stats retrieved successfully');

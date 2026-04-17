@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import orderService from '../../services/orderService';
+import supplierService from '../../services/supplierService';
 
 const initialState = {
-  orders: [],
-  order: null,
+  suppliers: [],
+  supplier: null,
   isLoading: false,
   error: null,
   pagination: {
@@ -14,11 +14,11 @@ const initialState = {
   },
 };
 
-export const getOrders = createAsyncThunk(
-  'orders/getAll',
+export const getSuppliers = createAsyncThunk(
+  'suppliers/getAll',
   async (params, thunkAPI) => {
     try {
-      return await orderService.getOrders(params);
+      return await supplierService.getSuppliers(params);
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.message) ||
@@ -29,11 +29,11 @@ export const getOrders = createAsyncThunk(
   }
 );
 
-export const getOrder = createAsyncThunk(
-  'orders/getOne',
+export const getSupplier = createAsyncThunk(
+  'suppliers/getOne',
   async (id, thunkAPI) => {
     try {
-      return await orderService.getOrder(id);
+      return await supplierService.getSupplier(id);
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.message) ||
@@ -44,11 +44,11 @@ export const getOrder = createAsyncThunk(
   }
 );
 
-export const createOrder = createAsyncThunk(
-  'orders/create',
-  async (orderData, thunkAPI) => {
+export const createSupplier = createAsyncThunk(
+  'suppliers/create',
+  async (supplierData, thunkAPI) => {
     try {
-      return await orderService.createOrder(orderData);
+      return await supplierService.createSupplier(supplierData);
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.message) ||
@@ -59,11 +59,11 @@ export const createOrder = createAsyncThunk(
   }
 );
 
-export const updateOrderStatus = createAsyncThunk(
-  'orders/updateStatus',
-  async ({ id, status }, thunkAPI) => {
+export const updateSupplier = createAsyncThunk(
+  'suppliers/update',
+  async ({ id, supplierData }, thunkAPI) => {
     try {
-      return await orderService.updateOrderStatus(id, { status });
+      return await supplierService.updateSupplier(id, supplierData);
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.message) ||
@@ -74,47 +74,47 @@ export const updateOrderStatus = createAsyncThunk(
   }
 );
 
-const orderSlice = createSlice({
-  name: 'orders',
+const supplierSlice = createSlice({
+  name: 'suppliers',
   initialState,
   reducers: {
     reset: (state) => {
       state.isLoading = false;
       state.error = null;
-      state.order = null;
+      state.supplier = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getOrders.pending, (state) => {
+      .addCase(getSuppliers.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getOrders.fulfilled, (state, action) => {
+      .addCase(getSuppliers.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.orders = action.payload.data;
+        state.suppliers = action.payload.data;
         state.pagination = action.payload.pagination;
       })
-      .addCase(getOrders.rejected, (state, action) => {
+      .addCase(getSuppliers.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
-      .addCase(getOrder.fulfilled, (state, action) => {
+      .addCase(getSupplier.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.order = action.payload;
+        state.supplier = action.payload.data;
       })
-      .addCase(createOrder.fulfilled, (state, action) => {
+      .addCase(createSupplier.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.orders.unshift(action.payload.data || action.payload);
+        state.suppliers.unshift(action.payload.data);
       })
-      .addCase(updateOrderStatus.fulfilled, (state, action) => {
-        const updatedOrder = action.payload.data;
-        const index = state.orders.findIndex((o) => o.id === updatedOrder.id);
+      .addCase(updateSupplier.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const index = state.suppliers.findIndex((s) => s.id === action.payload.data.id);
         if (index !== -1) {
-          state.orders[index] = { ...state.orders[index], status: updatedOrder.status };
+          state.suppliers[index] = action.payload.data;
         }
       });
   },
 });
 
-export const { reset } = orderSlice.actions;
-export default orderSlice.reducer;
+export const { reset } = supplierSlice.actions;
+export default supplierSlice.reducer;

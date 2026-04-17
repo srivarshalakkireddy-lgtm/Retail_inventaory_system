@@ -15,8 +15,8 @@ const createOrder = async (orderData) => {
   return response.data;
 };
 
-const updateOrder = async (id, orderData) => {
-  const response = await api.put(`/orders/${id}`, orderData);
+const updateOrderStatus = async (id, statusData) => {
+  const response = await api.put(`/orders/${id}/status`, statusData);
   return response.data;
 };
 
@@ -24,7 +24,7 @@ const orderService = {
   getOrders,
   getOrder,
   createOrder,
-  updateOrder,
+  updateOrderStatus,
 };
 
 export default orderService;

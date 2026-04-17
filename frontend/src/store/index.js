@@ -4,6 +4,8 @@ import productReducer from './slices/productSlice';
 import inventoryReducer from './slices/inventorySlice';
 import orderReducer from './slices/orderSlice';
 import uiReducer from './slices/uiSlice';
+import supplierReducer from './slices/supplierSlice';
+import userReducer from './slices/userSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ const store = configureStore({
     inventory: inventoryReducer,
     orders: orderReducer,
     ui: uiReducer,
+    suppliers: supplierReducer,
+    users: userReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

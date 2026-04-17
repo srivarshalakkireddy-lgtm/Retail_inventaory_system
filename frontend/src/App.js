@@ -16,6 +16,7 @@ import OrderList from './pages/orders/OrderList';
 import OrderForm from './pages/orders/OrderForm';
 import SupplierList from './pages/suppliers/SupplierList';
 import Reports from './pages/Reports';
+import UserList from './pages/users/UserList';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
@@ -83,6 +84,7 @@ function App() {
         <Route path="reports" element={<Reports />} />
 
         {/* User */}
+        <Route path="users" element={<UserList />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Settings />} />
       </Route>

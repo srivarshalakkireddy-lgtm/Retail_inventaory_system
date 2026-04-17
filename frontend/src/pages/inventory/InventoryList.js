@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
+  Button,
   Card,
   Typography,
   Chip,
@@ -12,12 +13,39 @@ import {
   TableCell,
   TableBody,
   CircularProgress,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
-import { getInventory } from '../../store/slices/inventorySlice';
+import { Edit } from '@mui/icons-material';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { toast } from 'react-toastify';
+import { getInventory, adjustInventory } from '../../store/slices/inventorySlice';
+
+const adjustSchema = yup.object().shape({
+  quantity: yup.number().required('Quantity adjustment is required'),
+  reason: yup.string().required('Reason is required')
+});
 
 const InventoryList = () => {
   const dispatch = useDispatch();
   const { inventory, isLoading } = useSelector((state) => state.inventory);
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+    resolver: yupResolver(adjustSchema),
+    defaultValues: {
+      quantity: 0,
+      reason: ''
+    }
+  });
 
   useEffect(() => {
     dispatch(getInventory());
@@ -33,7 +61,36 @@ const InventoryList = () => {
     return { label: 'OK', color: 'success' };
   };
 
-  if (isLoading) {
+  const handleOpenAdjust = (item) => {
+    setSelectedItem(item);
+    reset({
+      quantity: 0,
+      reason: ''
+    });
+    setOpenDialog(true);
+  };
+
+  const onClose = () => {
+    setOpenDialog(false);
+    setSelectedItem(null);
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      await dispatch(adjustInventory({
+        product_id: selectedItem.product_id,
+        location_id: selectedItem.location_id,
+        quantity: data.quantity,
+        reason: data.reason
+      })).unwrap();
+      toast.success('Inventory adjusted successfully');
+      onClose();
+    } catch (err) {
+      toast.error(err || 'Failed to adjust inventory');
+    }
+  };
+
+  if (isLoading && !openDialog) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
         <CircularProgress />
@@ -43,12 +100,16 @@ const InventoryList = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom fontWeight="600">
-        Inventory
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Track inventory levels across all locations
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <div>
+          <Typography variant="h4" gutterBottom fontWeight="600">
+            Inventory
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Track inventory levels across all locations
+          </Typography>
+        </div>
+      </Box>
 
       <Card>
         <TableContainer>
@@ -62,12 +123,13 @@ const InventoryList = () => {
                 <TableCell align="right">Reserved</TableCell>
                 <TableCell align="right">In Transit</TableCell>
                 <TableCell>Status</TableCell>
+                <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {(!inventory || inventory.length === 0) ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={8} align="center">
                     <Typography color="text.secondary" sx={{ py: 3 }}>
                       No inventory data available
                     </Typography>
@@ -103,11 +165,12 @@ const InventoryList = () => {
                       <TableCell align="right">{item.quantity_reserved}</TableCell>
                       <TableCell align="right">{item.quantity_in_transit}</TableCell>
                       <TableCell>
-                        <Chip
-                          label={status.label}
-                          color={status.color}
-                          size="small"
-                        />
+                        <Chip label={status.label} color={status.color} size="small" />
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" title="Adjust Stock" onClick={() => handleOpenAdjust(item)}>
+                          <Edit fontSize="small" />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   );
@@ -117,6 +180,55 @@ const InventoryList = () => {
           </Table>
         </TableContainer>
       </Card>
+
+      <Dialog open={openDialog} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Adjust Stock</DialogTitle>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogContent dividers>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Adjusting stock for: <strong>{selectedItem?.product?.name}</strong> at <strong>{selectedItem?.location?.name}</strong>
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Current Available Stock: <strong>{selectedItem?.quantity_available}</strong>
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Controller
+                name="quantity"
+                control={control}
+                render={({ field }) => (
+                  <TextField 
+                    {...field} 
+                    type="number" 
+                    label="Adjustment Quantity (+/-)" 
+                    fullWidth 
+                    error={!!errors.quantity} 
+                    helperText={errors.quantity?.message || 'Use negative numbers to deduct stock'} 
+                  />
+                )}
+              />
+              <Controller
+                name="reason"
+                control={control}
+                render={({ field }) => (
+                  <TextField 
+                    {...field} 
+                    label="Reason for adjustment" 
+                    fullWidth 
+                    multiline 
+                    rows={2} 
+                    error={!!errors.reason} 
+                    helperText={errors.reason?.message} 
+                  />
+                )}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="contained">Apply Adjustment</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </Box>
   );
 };
