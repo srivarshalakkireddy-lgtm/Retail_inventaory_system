@@ -22,7 +22,7 @@ import {
   MenuItem,
   Grid
 } from '@mui/material';
-import { Edit, AddPerson } from '@mui/icons-material';
+import { Edit } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
