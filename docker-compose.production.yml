@@ -17,7 +17,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=http://localhost:5000/api
+        - REACT_APP_API_URL=http://15.135.192.6:5000/api
     image: retail-inventory-frontend:latest
     ports:
       - "80:80"
