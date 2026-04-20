@@ -40,7 +40,8 @@ CREATE TABLE user_sessions (
     ip_address VARCHAR(45),
     user_agent TEXT,
     expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -110,7 +111,8 @@ CREATE TABLE product_images (
     image_url VARCHAR(500) NOT NULL,
     is_primary BOOLEAN DEFAULT false,
     sort_order INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -145,6 +147,7 @@ CREATE TABLE inventory_transactions (
     reference_id UUID,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by UUID REFERENCES users(id)
 );
 
@@ -159,6 +162,7 @@ CREATE TABLE stock_adjustments (
     approved_at TIMESTAMP,
     status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by UUID REFERENCES users(id)
 );
 
@@ -185,7 +189,8 @@ CREATE TABLE stock_transfer_items (
     quantity_sent INTEGER NOT NULL,
     quantity_received INTEGER,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -262,7 +267,8 @@ CREATE TABLE purchase_order_items (
     unit_cost DECIMAL(10, 2) NOT NULL,
     total_cost DECIMAL(12, 2) NOT NULL,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -325,7 +331,8 @@ CREATE TABLE sales_order_items (
     quantity_picked INTEGER DEFAULT 0,
     quantity_shipped INTEGER DEFAULT 0,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -341,7 +348,8 @@ CREATE TABLE audit_log (
     new_values JSONB,
     user_id UUID REFERENCES users(id),
     ip_address VARCHAR(45),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================
@@ -410,6 +418,18 @@ CREATE TRIGGER update_suppliers_updated_at BEFORE UPDATE ON suppliers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_sales_order_items_updated_at BEFORE UPDATE ON sales_order_items
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_purchase_order_items_updated_at BEFORE UPDATE ON purchase_order_items
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_stock_transfer_items_updated_at BEFORE UPDATE ON stock_transfer_items
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_stock_adjustments_updated_at BEFORE UPDATE ON stock_adjustments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Function to log inventory changes

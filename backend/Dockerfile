@@ -1,18 +1,23 @@
+# Use Node.js 18 alpine as base image
 FROM node:18-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files first to leverage Docker layer caching
+# Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (production only)
+RUN npm install --production
 
-# Copy application files (volume mount in compose will override this during dev, 
-# but building the image completely is good practice)
+# Copy application source
 COPY . .
 
+# Create logs directory
+RUN mkdir -p logs
+
+# Expose the port the app runs on
 EXPOSE 5000
 
-# Default command (can be overridden by docker-compose)
-CMD ["npm", "run", "dev"]
+# Start the application
+CMD ["npm", "start"]

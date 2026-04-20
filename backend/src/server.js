@@ -27,19 +27,41 @@ const API_PREFIX = process.env.API_PREFIX || '/api';
 // Trust proxy
 app.set('trust proxy', 1);
 
+app.use((req, res, next) => {
+  console.log(`[DEBUG] Incoming Request: ${req.method} ${req.url}`);
+  next();
+});
+
 // Security middleware
 app.use(helmet());
+app.use((req, res, next) => {
+  console.log('[DEBUG] Helmet passed');
+  next();
+});
+
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
+app.use((req, res, next) => {
+  console.log('[DEBUG] CORS passed');
+  next();
+});
 
 // Compression
 app.use(compression());
+app.use((req, res, next) => {
+  console.log('[DEBUG] Compression passed');
+  next();
+});
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use((req, res, next) => {
+  console.log('[DEBUG] Body Parser passed');
+  next();
+});
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
