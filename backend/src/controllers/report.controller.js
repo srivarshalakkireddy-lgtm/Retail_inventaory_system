@@ -8,31 +8,33 @@ const { successResponse } = require('../utils/response');
  */
 const getDashboardStats = async (req, res, next) => {
   try {
-    // Get total products
-    const totalProducts = await Product.count({ where: { is_active: true } });
+    // Parallelize queries to reduce latency from cross-region DB calls
+    const [
+      totalProducts,
+      totalOrders,
+      revenueResult,
+      lowStockItems,
+      orderStatusCounts
+    ] = await Promise.all([
+      Product.count({ where: { is_active: true } }),
+      SalesOrder.count(),
+      SalesOrder.sum('total_amount'),
+      Inventory.count({
+        include: [
+          {
+            model: Product,
+            as: 'product',
+            where: sequelize.literal('"Inventory"."quantity_available" <= "product"."reorder_point"'),
+          },
+        ],
+      }),
+      SalesOrder.findAll({
+        attributes: ['status', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+        group: ['status']
+      })
+    ]);
 
-    // Get total orders
-    const totalOrders = await SalesOrder.count();
-
-    // Get total revenue
-    const revenueResult = await SalesOrder.sum('total_amount');
     const totalRevenue = revenueResult || 0;
-
-    const lowStockItems = await Inventory.count({
-      include: [
-        {
-          model: Product,
-          as: 'product',
-          where: sequelize.literal('"Inventory"."quantity_available" <= "product"."reorder_point"'),
-        },
-      ],
-    });
-
-    // Get order status counts
-    const orderStatusCounts = await SalesOrder.findAll({
-      attributes: ['status', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
-      group: ['status']
-    });
 
     const stats = {
       totalProducts,

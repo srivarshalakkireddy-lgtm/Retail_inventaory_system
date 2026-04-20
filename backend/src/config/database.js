@@ -7,10 +7,10 @@ const sequelize = process.env.DATABASE_URL
     dialect: 'postgres',
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
-      max: parseInt(process.env.DB_POOL_MAX) || 10,
-      min: parseInt(process.env.DB_POOL_MIN) || 2,
-      acquire: 30000,
-      idle: 10000,
+      max: parseInt(process.env.DB_POOL_MAX) || 15,
+      min: parseInt(process.env.DB_POOL_MIN) || 5,
+      acquire: 60000,
+      idle: 30000,
     },
     define: {
       timestamps: true,
@@ -39,8 +39,8 @@ const sequelize = process.env.DATABASE_URL
       pool: {
         max: parseInt(process.env.DB_POOL_MAX) || 20,
         min: parseInt(process.env.DB_POOL_MIN) || 5,
-        acquire: 30000,
-        idle: 10000,
+        acquire: 60000,
+        idle: 30000,
       },
       define: {
         timestamps: true,
