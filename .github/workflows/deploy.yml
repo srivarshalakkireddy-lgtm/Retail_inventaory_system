@@ -19,12 +19,12 @@ jobs:
         script: |
           # 1. Project folder par jana (create if not exists)
           if [ ! -d "retail-project" ]; then
-            git clone https://github.com/${{ github.repository }} retail-project
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} retail-project
           fi
           cd retail-project
           
           # 2. Latest code pull karna
-          git pull origin main
+          git pull https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
           
           # 3. Docker containers restart karna
           docker compose -f docker-compose.production.yml down
