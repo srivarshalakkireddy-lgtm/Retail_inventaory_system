@@ -133,9 +133,13 @@ const ProductForm = () => {
                   render={({ field }) => (
                     <TextField {...field} select fullWidth label="Category" error={!!errors.category_id} helperText={errors.category_id?.message}>
                       <MenuItem value="">Select Category</MenuItem>
-                      <MenuItem value="1">Electronics</MenuItem>
-                      <MenuItem value="2">Apparel</MenuItem>
-                      <MenuItem value="3">Home & Garden</MenuItem>
+                      <MenuItem value="15ffa099-9c0b-4ef8-bb6d-6bb9bd380c11">Electronics</MenuItem>
+                      <MenuItem value="18c2d399-9c0b-4ef8-bb6d-6bb9bd380c44">-- Smartphones</MenuItem>
+                      <MenuItem value="19d3e499-9c0b-4ef8-bb6d-6bb9bd380c55">-- Laptops</MenuItem>
+                      <MenuItem value="16a0b199-9c0b-4ef8-bb6d-6bb9bd380c22">Apparel</MenuItem>
+                      <MenuItem value="20e4f599-9c0b-4ef8-bb6d-6bb9bd380c66">-- Mens Clothing</MenuItem>
+                      <MenuItem value="21f50699-9c0b-4ef8-bb6d-6bb9bd380c77">-- Womens Clothing</MenuItem>
+                      <MenuItem value="17b1c299-9c0b-4ef8-bb6d-6bb9bd380c33">Home & Garden</MenuItem>
                     </TextField>
                   )}
                 />

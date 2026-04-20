@@ -13,11 +13,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
     networks:
       - rims-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,7 +32,7 @@ services:
     networks:
       - rims-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -75,7 +76,7 @@ services:
       dockerfile: Dockerfile
     container_name: rims-frontend
     environment:
-      REACT_APP_API_URL: http://localhost:5000/api
+      REACT_APP_API_URL: /api
     ports:
       - "3000:3000"
     volumes:

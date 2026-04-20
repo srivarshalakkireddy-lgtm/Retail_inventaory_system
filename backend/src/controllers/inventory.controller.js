@@ -93,6 +93,7 @@ const getInventoryByLocation = async (req, res, next) => {
 const adjustInventory = async (req, res, next) => {
   try {
     const { product_id, location_id, quantity, reason } = req.body;
+    const updated_by = req.user.id;
 
     let inventory = await Inventory.findOne({
       where: { product_id, location_id },
@@ -104,6 +105,8 @@ const adjustInventory = async (req, res, next) => {
         product_id,
         location_id,
         quantity_available: quantity,
+        last_adjustment_reason: reason,
+        updated_by,
       });
     } else {
       // Update existing inventory
@@ -113,7 +116,11 @@ const adjustInventory = async (req, res, next) => {
         return errorResponse(res, 'Insufficient inventory', 400);
       }
 
-      await inventory.update({ quantity_available: newQuantity });
+      await inventory.update({
+        quantity_available: newQuantity,
+        last_adjustment_reason: reason,
+        updated_by,
+      });
     }
 
     const updatedInventory = await Inventory.findByPk(inventory.id, {

@@ -105,10 +105,6 @@ const Settings = () => {
 
         <List subheader={<Typography variant="h6" sx={{ p: 2, pb: 1 }}>Display Preferences</Typography>}>
           <ListItem>
-            <ListItemText
-              primary="Dark Mode"
-              secondary="Switch appearance to a dark theme"
-            />
             <ListItemSecondaryAction>
               <Switch
                 edge="end"

@@ -126,6 +126,8 @@ CREATE TABLE inventory (
     quantity_in_transit INTEGER DEFAULT 0 CHECK (quantity_in_transit >= 0),
     last_counted_at TIMESTAMP,
     last_counted_by UUID REFERENCES users(id),
+    last_adjustment_reason VARCHAR(255),
+    updated_by UUID REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(product_id, location_id)
@@ -420,12 +422,14 @@ BEGIN
             location_id,
             transaction_type,
             quantity,
+            notes,
             created_by
         ) VALUES (
             NEW.product_id,
             NEW.location_id,
             'adjustment',
             NEW.quantity_available - OLD.quantity_available,
+            NEW.last_adjustment_reason,
             NEW.updated_by
         );
     END IF;

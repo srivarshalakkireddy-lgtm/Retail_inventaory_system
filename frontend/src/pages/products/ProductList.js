@@ -17,7 +17,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add, Edit, Delete, Visibility } from '@mui/icons-material';
-import { getProducts } from '../../store/slices/productSlice';
+import { getProducts, deleteProduct } from '../../store/slices/productSlice';
 
 const ProductList = () => {
   const navigate = useNavigate();
@@ -109,7 +109,11 @@ const ProductList = () => {
                       >
                         <Edit fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" title="Delete" color="error">
+                      <IconButton size="small" title="Delete" color="error" onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this product?')) {
+                          dispatch(deleteProduct(product.id));
+                        }
+                      }}>
                         <Delete fontSize="small" />
                       </IconButton>
                     </TableCell>

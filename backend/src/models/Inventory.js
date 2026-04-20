@@ -47,6 +47,16 @@ module.exports = (sequelize, DataTypes) => {
       last_counted_at: {
         type: DataTypes.DATE,
       },
+      last_adjustment_reason: {
+        type: DataTypes.STRING,
+      },
+      updated_by: {
+        type: DataTypes.UUID,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+      },
     },
     {
       tableName: 'inventory',
