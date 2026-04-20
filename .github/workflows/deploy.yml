@@ -23,7 +23,10 @@ jobs:
           fi
           cd retail-project
           
-          # 2. Latest code pull karna
+          # 2. .env file create karna (Secret se)
+          echo "${{ secrets.BACKEND_ENV }}" > backend/.env
+          
+          # 3. Latest code pull karna
           git pull https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
           
           # 3. Docker containers restart karna
