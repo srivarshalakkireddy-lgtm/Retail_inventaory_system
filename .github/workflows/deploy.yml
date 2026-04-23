@@ -7,8 +7,35 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
     - uses: actions/checkout@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push Backend Image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./backend
+        push: true
+        tags: ghcr.io/${{ github.repository_owner }}/retail-inventory-backend:latest
+
+    - name: Build and Push Frontend Image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./frontend
+        push: true
+        build-args: |
+          REACT_APP_API_URL=http://${{ secrets.AWS_EC2_IP }}:5000/api
+        tags: ghcr.io/${{ github.repository_owner }}/retail-inventory-frontend:latest
 
     - name: Deploy to EC2 via SSH
       uses: appleboy/ssh-action@v0.1.10
@@ -18,31 +45,22 @@ jobs:
         key: ${{ secrets.AWS_SSH_KEY }}
         command_timeout: 30m
         script: |
-          # 1. Swap Space Check (RAM kam hone par build fail nahi hoga)
-          if [ ! -f /swapfile ]; then
-            sudo fallocate -l 2G /swapfile
-            sudo chmod 600 /swapfile
-            sudo mkswap /swapfile
-            sudo swapon /swapfile
-            echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-            echo "Swapfile created successfully"
-          fi
-          
-          # 2. Project folder par jana
+          # 1. Project folder Setup
           if [ ! -d "retail-project" ]; then
             git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} retail-project
           fi
           cd retail-project
           
-          # 3. .env file update
+          # 2. .env file update
           echo "${{ secrets.BACKEND_ENV }}" > backend/.env
           
-          # 4. Latest code pull
-          git pull https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
+          # 3. GitHub Registry Login on EC2
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
-          # 5. Docker containers build aur restart
-          docker compose -f docker-compose.production.yml down
-          docker compose -f docker-compose.production.yml up --build -d
+          # 4. Pull Latest Images and Restart
+          export GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
+          docker compose -f docker-compose.production.yml pull
+          docker compose -f docker-compose.production.yml up -d
           
-          # 6. Cleanup
+          # 5. Cleanup
           docker image prune -f
