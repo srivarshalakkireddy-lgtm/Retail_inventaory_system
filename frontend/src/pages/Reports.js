@@ -15,6 +15,8 @@ import {
 } from 'recharts';
 import reportService from '../services/reportService';
 
+const COLORS = ['#0088FE', '#FFBB28', '#FF8042', '#00C49F'];
+
 const Reports = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,6 @@ const Reports = () => {
   ];
 
   const filteredOrderData = orderData.filter(d => d.count > 0);
-  const COLORS = ['#0088FE', '#FFBB28', '#FF8042', '#00C49F'];
 
   return (
     <Box sx={{ flexGrow: 1 }}>
