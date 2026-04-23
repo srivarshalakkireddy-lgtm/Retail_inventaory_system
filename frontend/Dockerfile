@@ -11,7 +11,7 @@ COPY . .
 # Build the app (REACT_APP_API_URL can be passed as build-arg)
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
 
 # Stage 2: Serve the app using Nginx
 FROM nginx:stable-alpine

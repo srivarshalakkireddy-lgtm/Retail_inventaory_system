@@ -16,22 +16,33 @@ jobs:
         host: ${{ secrets.AWS_EC2_IP }}
         username: ubuntu
         key: ${{ secrets.AWS_SSH_KEY }}
+        command_timeout: 30m
         script: |
-          # 1. Project folder par jana (create if not exists)
+          # 1. Swap Space Check (RAM kam hone par build fail nahi hoga)
+          if [ ! -f /swapfile ]; then
+            sudo fallocate -l 2G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+            echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+            echo "Swapfile created successfully"
+          fi
+          
+          # 2. Project folder par jana
           if [ ! -d "retail-project" ]; then
             git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} retail-project
           fi
           cd retail-project
           
-          # 2. .env file create karna (Secret se)
+          # 3. .env file update
           echo "${{ secrets.BACKEND_ENV }}" > backend/.env
           
-          # 3. Latest code pull karna
+          # 4. Latest code pull
           git pull https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
           
-          # 3. Docker containers restart karna
+          # 5. Docker containers build aur restart
           docker compose -f docker-compose.production.yml down
           docker compose -f docker-compose.production.yml up --build -d
           
-          # 4. Cleanup old images
+          # 6. Cleanup
           docker image prune -f
