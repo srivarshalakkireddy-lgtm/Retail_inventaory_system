@@ -8,7 +8,6 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Switch,
-  Divider,
 } from '@mui/material';
 
 const Settings = () => {
@@ -50,7 +49,7 @@ const Settings = () => {
               />
             </ListItemSecondaryAction>
           </ListItem>
-          <Divider />
+          
           <ListItem>
             <ListItemText
               primary="SMS Notifications"
@@ -67,8 +66,6 @@ const Settings = () => {
           </ListItem>
         </List>
 
-        <Divider sx={{ borderWidth: 4, borderColor: 'background.default' }} />
-
         <List subheader={<Typography variant="h6" sx={{ p: 2, pb: 1 }}>Inventory Alerts</Typography>}>
           <ListItem>
             <ListItemText
@@ -84,7 +81,7 @@ const Settings = () => {
               />
             </ListItemSecondaryAction>
           </ListItem>
-          <Divider />
+          
           <ListItem>
             <ListItemText
               primary="Weekly Summary Reports"
@@ -101,8 +98,6 @@ const Settings = () => {
           </ListItem>
         </List>
 
-        <Divider sx={{ borderWidth: 4, borderColor: 'background.default' }} />
-
         <List subheader={<Typography variant="h6" sx={{ p: 2, pb: 1 }}>Display Preferences</Typography>}>
           <ListItem>
             <ListItemSecondaryAction>
@@ -114,7 +109,7 @@ const Settings = () => {
               />
             </ListItemSecondaryAction>
           </ListItem>
-          <Divider />
+          
           <ListItem>
             <ListItemText
               primary="Compact List View"
