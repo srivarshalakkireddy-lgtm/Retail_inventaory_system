@@ -21,7 +21,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 const orderSchema = yup.object().shape({
-  customer_id: yup.string().uuid('Customer ID must be a valid UUID').nullable().transform(value => value || null),
   location_id: yup.string().uuid('Location ID must be a valid UUID').required('Location is required'),
   status: yup.string().required('Status is required'),
   notes: yup.string()
@@ -35,7 +34,6 @@ const OrderForm = () => {
   const { control, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(orderSchema),
     defaultValues: {
-      customer_id: '',
       location_id: '',
       status: 'pending',
       notes: '',
@@ -75,23 +73,7 @@ const OrderForm = () => {
               Order Details
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name="customer_id"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="Customer ID (Optional)"
-                      placeholder="Enter Customer UUID if known"
-                      error={!!errors.customer_id}
-                      helperText={errors.customer_id?.message}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <Controller
                   name="status"
                   control={control}
