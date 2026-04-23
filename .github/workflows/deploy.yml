@@ -45,22 +45,26 @@ jobs:
         key: ${{ secrets.AWS_SSH_KEY }}
         command_timeout: 30m
         script: |
-          # 1. Project folder Setup
-          if [ ! -d "retail-project" ]; then
-            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} retail-project
-          fi
+          # 1. Stop any host Nginx (Naya code port 80 lega)
+          sudo systemctl stop nginx || true
+          sudo systemctl disable nginx || true
+          
+          # 2. Cleanup and Clone/Pull
+          rm -rf retail-project
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} retail-project
           cd retail-project
           
-          # 2. .env file update
+          # 3. .env file update
           echo "${{ secrets.BACKEND_ENV }}" > backend/.env
           
-          # 3. GitHub Registry Login on EC2
+          # 4. GitHub Registry Login on EC2
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
-          # 4. Pull Latest Images and Restart
+          # 5. Pull and Force Restart
           export GITHUB_REPOSITORY_OWNER=${{ github.repository_owner }}
           docker compose -f docker-compose.production.yml pull
+          docker compose -f docker-compose.production.yml down
           docker compose -f docker-compose.production.yml up -d
           
-          # 5. Cleanup
+          # 6. Cleanup
           docker image prune -f

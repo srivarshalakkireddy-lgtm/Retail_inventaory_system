@@ -74,7 +74,7 @@ const Login = () => {
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Inventory2 sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
             <Typography variant="h4" component="h1" gutterBottom fontWeight="600">
-              Welcome Back Admin
+              Welcome Back
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Retail Inventory Management System
