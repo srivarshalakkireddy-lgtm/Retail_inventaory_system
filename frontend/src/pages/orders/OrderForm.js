@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate as useRouteNavigate } from 'react-router-dom';
 import {
@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { ArrowBack, Save, AddShoppingCart } from '@mui/icons-material';
 import { createOrder } from '../../store/slices/orderSlice';
+import locationService from '../../services/locationService';
 import { toast } from 'react-toastify';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -30,6 +31,19 @@ const OrderForm = () => {
   const navigate = useRouteNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [locations, setLocations] = useState([]);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await locationService.getLocations();
+        setLocations(response.data || []);
+      } catch (err) {
+        toast.error('Failed to load locations');
+      }
+    };
+    fetchLocations();
+  }, []);
 
   const { control, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(orderSchema),
@@ -103,11 +117,21 @@ const OrderForm = () => {
                     <TextField
                       {...field}
                       fullWidth
-                      label="Location ID (Warehouse)"
-                      placeholder="Enter Location UUID"
+                      select
+                      label="Location (Warehouse)"
                       error={!!errors.location_id}
                       helperText={errors.location_id?.message}
-                    />
+                    >
+                      <MenuItem value="">Select Location</MenuItem>
+                      {locations.map((loc) => (
+                        <MenuItem key={loc.id} value={loc.id}>
+                          {loc.name} ({loc.code})
+                        </MenuItem>
+                      ))}
+                      {locations.length === 0 && (
+                        <MenuItem value="" disabled>No locations available</MenuItem>
+                      )}
+                    </TextField>
                   )}
                 />
               </Grid>
